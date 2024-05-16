@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <title>Simple ToDo App</title>
+</head>
+<body>
+    <div id="wrapper">
+        <header>
+            <h1>Task List 2024</h1>
+        </header>
+        <main>
+            <form class="add-task" id="form-add-task">
+                <input type="text" id="input-task" placeholder="What do you have planned?" />
+                <span id="btn-add" class="btn-add">Add task</span>
+            </form>
+
+            <div class="list-tasks">
+                <h2>Tasks</h2>
+                <div class="data" id="data-tasks">
+                </div>
+                <p class="no-tasks">No task yet!</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

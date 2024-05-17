@@ -1,4 +1,53 @@
-let tasks = [];
+class Task {
+    constructor(id, name, done) {
+        this.id = id;
+        this.name = name;
+        this.done = done;
+    }
+}
+
+class TaskStorage {
+    static tasks = []
+
+    static getLists() {
+        const data = localStorage.getItem('tasks');
+        if (data) {
+            this.tasks = JSON.parse(data);
+        }
+
+        return this.tasks;
+    }
+
+    static getById(id) {
+        return this.tasks.find(t => t.id === id);
+    }
+
+    static save(task) {
+        this.tasks.push(task);
+        console.log(this.tasks);
+        localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    }
+
+    static update(task) {
+        const taskIndex = this.tasks.findIndex(t => t.id === task.id);
+        if (taskIndex === -1) {
+            return;
+        }
+
+        this.tasks[taskIndex] = task;
+        localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    }
+
+    static delete(id) {
+        const taskIndex = this.tasks.findIndex(t => t.id === id);
+        if (taskIndex === -1) {
+            return;
+        }
+        
+        this.tasks.splice(taskIndex, 1);
+        localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    }
+}
 
 getListTasks();
 
@@ -16,7 +65,9 @@ function renderTasks() {
     const root = document.getElementById('data-tasks');
     root.innerHTML = ""
 
-    for (const task of tasks) {
+    const sortedTasks = [...TaskStorage.tasks].sort((a, b) => b.id - a.id);
+
+    for (const task of sortedTasks) {
         const elItem = renderTaskItem(task);
         root.appendChild(elItem);
     }
@@ -26,11 +77,28 @@ function renderTaskItem(task) {
     const el = document.createElement("div");
     el.classList.add('item');
     el.classList.add(`task-${task.id}`);
+    if (task.done) {
+        el.classList.add('done');
+    }
     el.setAttribute('data-id', `${task.id}`);
+
+    const elGroupNameCheckbox = document.createElement("div");
+    elGroupNameCheckbox.classList.add("group-name");
+    elGroupNameCheckbox.onclick = () => toggleDoneTask(task.id);
+
+    const elCheckbox = document.createElement("input");
+    elCheckbox.setAttribute('type', 'checkbox');
+    elCheckbox.setAttribute('value', task.id);
+    if (task.done) {
+        elCheckbox.setAttribute('checked', 'checked');
+    }
 
     const elTaskName = document.createElement("span");
     elTaskName.classList.add('name');
     elTaskName.textContent = task.name;
+
+    elGroupNameCheckbox.appendChild(elCheckbox);
+    elGroupNameCheckbox.appendChild(elTaskName);
 
     const elInput = document.createElement('input');
     elInput.setAttribute('type', 'text');
@@ -55,7 +123,7 @@ function renderTaskItem(task) {
     elTaskActions.appendChild(elBtnDel);
 
     el.appendChild(elInput);
-    el.appendChild(elTaskName);
+    el.appendChild(elGroupNameCheckbox);
     el.appendChild(elTaskActions);
 
     return el;
@@ -63,7 +131,7 @@ function renderTaskItem(task) {
 
 function checkToRenderNoTaskYet() {
     const el = document.getElementsByClassName('no-tasks')[0];
-    if (!tasks.length) {
+    if (!TaskStorage.tasks.length) {
         el.style.display = 'block';
     } else {
         el.style.display = 'none';
@@ -72,31 +140,24 @@ function checkToRenderNoTaskYet() {
 }
 
 function getListTasks() {
-    tasks = [
-        { id: 1, name: 'Build a Task app in 2021', done: false },
-        { id: 2, name: 'Subscribe to Tyler Potts', done: false },
-        { id: 3, name: 'Like the video!', done: true },
-        { id: 4, name: 'Watch anime!', done: false },
-        { id: 5, name: 'Learning English', done: true },
-    ];
-
+    TaskStorage.getLists();
     renderTasks();
 }
 
 function addTask() {
-    const elInput = document.getElementsById('input-task')[0];
+    const elInput = document.getElementById('input-task');
     const input = elInput.value.trim();
 
     if (!input) {
         return;
     } 
 
-    const newTask = {
-        id: (new Date()).getTime(),
-        name: input,
-        done: false,
-    };
-    tasks.push(newTask);
+    const newTask = new Task(
+        (new Date).getTime(),
+        input,
+        false,
+    );
+    TaskStorage.save(newTask);
 
     elInput.value = ""
 
@@ -109,7 +170,7 @@ function addTask() {
 }
 
 function showEditTaskForm(id) {
-    const elTaskName = document.querySelector(`.task-${id} span.name`);
+    const elTaskName = document.querySelector(`.task-${id} .group-name`);
     elTaskName.style.display = 'none';
 
     const elInput = document.querySelector(`.task-${id} .input-edit`);
@@ -122,7 +183,7 @@ function showEditTaskForm(id) {
 }
 
 function editTask(id) {
-    const task = tasks.find(tsk => tsk.id === id);
+    const task = TaskStorage.tasks.find(tsk => tsk.id === id);
     if (!task) {
         return;
     }
@@ -137,7 +198,8 @@ function editTask(id) {
    
     const elTaskName = document.querySelector(`.task-${id} span.name`);
     elTaskName.textContent = input;
-    elTaskName.style.display = 'block';
+
+    document.querySelector(`.task-${id} .group-name`).style.display = 'block';
 
     const elBtnEdit = document.querySelector(`.task-${id} .btn-edit`);
     elBtnEdit.textContent = 'Edit';
@@ -145,18 +207,13 @@ function editTask(id) {
 
     // persistent
     task.name = input;
-    console.log(task);
+    TaskStorage.update(task);
 }
 
 function deleteTask(id) {
-    const taskIndex = tasks.findIndex(tsk => tsk.id === id);
-    console.log(id, taskIndex);
-    if (taskIndex === -1) {
-        return;
-    }
-
-    tasks.splice(taskIndex, 1);
-
+    // persistent
+    TaskStorage.delete(id);
+    
     // update DOM
     const root = document.getElementById('data-tasks');
     const el = document.getElementsByClassName(`task-${id}`)[0];
@@ -164,3 +221,25 @@ function deleteTask(id) {
 
     checkToRenderNoTaskYet();
 }
+
+function toggleDoneTask(id) {
+    const task = TaskStorage.getById(id);
+    if (!task) {
+        return;
+    }
+
+    task.done = !task.done;
+    TaskStorage.update(task);
+
+    // update DOM
+    const el = document.getElementsByClassName(`task-${id}`)[0];
+    const elInputCheckbox = document.querySelector(`.task-${id} .group-name input[type="checkbox"]`);
+    if (task.done) {
+        el.classList.add('done');
+        elInputCheckbox.setAttribute('checked', 'checked');
+    } else {
+        el.classList.remove('done');
+        elInputCheckbox.removeAttribute('checked');
+    }
+    console.log(elInputCheckbox);
+} 

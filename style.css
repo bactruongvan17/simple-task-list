@@ -94,10 +94,12 @@ form.add-task span.btn-add {
     background-image: linear-gradient(to right, #b31d9a, #8b42c7);
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    cursor: pointer;
 }
 
 .list-tasks .btn-del {
     color: #b80a0a;
+    cursor: pointer;
 }
 
 .no-tasks {
@@ -113,4 +115,10 @@ form.add-task span.btn-add {
 
 .input-edit:focus {
     outline: none;
+}
+
+.group-name {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }

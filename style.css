@@ -6,13 +6,16 @@ html, body {
     font-style: normal;
     color: #ffffff;
     height: 100vh;
+    background-color: #3d3f52;
 }
 
 #wrapper {
-    background-color: #3d3f52;
+    background-color: #1c1d25;
     padding: 8px 12px;
     border-radius: 12px;
-    height: 100%;
+    height: calc(100% - 36px);
+    width: 480px;
+    margin: 0 auto;
 }
 
 header h1 {
